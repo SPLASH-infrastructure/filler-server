@@ -8,9 +8,9 @@ var stream = async function (options) {
   await options.prepare(browser, page);
 
   var ffmpegPath = options.ffmpeg || 'ffmpeg';
-  var fps = options.fps || 30;
+  var fps = options.fps || 25;
   var resolution = options.resolution || '1920x1080';
-  var preset = options.preset || 'medium';
+  var preset = options.preset || 'ultrafast';
   var rate = options.rate || '2500k';
   var threads = options.threads || '2';
 
@@ -58,7 +58,6 @@ const ffmpegArgs = (fps) => [
     await options.render(browser, page);
 
     screenshot = await page.screenshot({ type: 'jpeg' });
-    console.log("frame")
 
     await ffmpeg.stdin.write(screenshot);
   }
@@ -75,12 +74,13 @@ puppeteer.launch({
 }).then(async browser => {
   const page = await browser.newPage();
 
-  await page.goto('http://localhost:8080/', { waitUntil: 'networkidle2' });
-
+  console.log(`serving ${process.argv[2]} as the source URL`)
+  await page.goto(process.argv[2], { waitUntil: 'networkidle2' });
+  console.log(`writing to ${process.argv[3]} as destination URL`)
   await stream({
     page: page,
-    output: 'rtmp://ps-61488c636e2ff10001b54e93-rgaizldo.veset.cloud/live/', 
-    key: 'fillera',
+    output: process.argv[3], 
+    key: '',
     fps: 25,
     prepare: function (browser, page) { },
     render: function (browser, page, frame) { }
